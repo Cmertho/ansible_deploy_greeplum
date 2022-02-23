@@ -29,7 +29,7 @@
   become: true
   become_user: gpadmin
   become_method: sudo
-  shell: "source {{ installed_dir.files[0].path }}/greenplum_path.sh  && gpinitsystem -c /home/gpadmin/gpinitsystem_singlenode -h /home/gpadmin/hostlist_singlenode -a -q --ignore-warnings"
+  shell: "source {{ installed_dir.files[0].path }}/greenplum_path.sh  && gpinitsystem -c /home/{{ greenplum_admin_user }}/gpinitsystem_singlenode -h /home/{{ greenplum_admin_user }}/hostlist_singlenode -a -q --ignore-warnings"
   ignore_errors: true
   changed_when: false
   args:
@@ -44,16 +44,16 @@
     src: env_systemmd.j2
     dest: /home/{{ greenplum_admin_user }}/env_systemmd
     mode: 0755
-    owner: gpadmin
-    group: gpadmin
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
   become: true
 
 - name: Copy config
   template:
     src: greenplum-db.service.j2
     dest: /etc/systemd/system/greenplum-db.service
-    owner: gpadmin
-    group: gpadmin
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
     mode: 0744
     force: true
     backup: true
