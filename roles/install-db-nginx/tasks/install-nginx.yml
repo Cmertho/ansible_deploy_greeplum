@@ -10,9 +10,12 @@
 
 - name: stopped service db
   systemd:
-    name: greenplum-db
+    name: "{{ item }}"
     state: stopped
   become: true
+  loop:
+    - nginx
+    - greenplum-db
   tags:
     - test_not_install_nginx
 
