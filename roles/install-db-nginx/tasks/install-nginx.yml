@@ -79,7 +79,8 @@
   tags:
     - test_install_nginx
 
-- name: wait check site
-  wait_for: 60
+- name: wait start jenkins
+  wait_for:
+    timeout: 60
   tags:
     - test_install_nginx
