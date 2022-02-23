@@ -1,0 +1,21 @@
+- name: default pkg
+  apt:
+    pkg:
+      - gpg
+      - curl
+      - aptitude
+      - sudo
+      - apt-transport-https
+      - htop
+      - atop
+      - openjdk-11-jre
+      - python3-pip
+    update_cache: true
+  become: true
+
+- name: install ansible
+  pip:
+    name: ansible==2.10
+    state: present
+    executable: pip3
+  become: true

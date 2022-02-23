@@ -1,0 +1,80 @@
+---
+
+- name: started service db
+  systemd:
+    name: greenplum-db
+    state: started
+  become: true
+  tags:
+    - test_install_nginx
+
+- name: stopped service db
+  systemd:
+    name: greenplum-db
+    state: stopped
+  become: true
+  tags:
+    - test_not_install_nginx
+
+- name: remove old nginx
+  apt:
+    name: nginx
+    state: absent
+    purge: true
+  become: true
+  tags:
+    - test_install_nginx
+    - test_not_install_nginx
+
+- name: install lib pg
+  pip:
+    name: psycopg2-binary
+    state: present
+    executable: pip3
+  environment:
+    PATH: "{{ installed_dir.files[0].path }}/bin:{{ ansible_facts.env.PATH }}"
+  become: true
+  tags:
+    - test_install_nginx
+    - test_not_install_nginx
+
+- name: check ping pginit
+  postgresql_ping:
+    db: postgres
+    login_host: localhost
+    login_user: gpadmin
+  register: pg_connect
+  tags:
+    - test_install_nginx
+    - test_not_install_nginx
+
+- name: check connect
+  fail:
+    msg: "Connect db is not avalible"
+  when: not pg_connect.is_available
+  tags:
+    - test_install_nginx
+    - test_not_install_nginx
+
+- name: install nginx
+  apt:
+    name: nginx
+    state: present
+  when: pg_connect.is_available
+  become: true
+  tags:
+    - test_install_nginx
+    - test_not_install_nginx
+
+- name: check nginx
+  uri:
+    url: "http://{{ ansible_host }}"
+  register: content_nginx
+  tags:
+    - test_install_nginx
+
+- name: message
+  debug:
+    msg: "{{ content_nginx }}"
+  tags:
+    - test_install_nginx

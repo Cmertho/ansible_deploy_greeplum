@@ -1,0 +1,11 @@
+PYTHONHOME={{ installed_dir.files[0].path }}/ext/python
+LANG=en_US.UTF-8
+USER={{ greenplum_admin_user }}
+GPHOME={{ installed_dir.files[0].path }}
+PGDATABASE=postgre
+MASTER_DATA_DIRECTORY=/home/{{ greenplum_admin_user }}/master/gpsne-1/
+PGUSER={{ greenplum_admin_user }}
+PYTHONPATH={{ installed_dir.files[0].path }}/lib/python
+LOGNAME={{ greenplum_admin_user }}
+PATH={{ installed_dir.files[0].path }}/bin:{{ installed_dir.files[0].path }}/ext/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PGPORT=5432

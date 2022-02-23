@@ -1,0 +1,23 @@
+# BEGIN ANSIBLE MANAGED BLOCK
+[Unit]
+Description=greenplum-db
+Wants=network.target
+After=network.target
+
+[Service]
+Type=forking
+WorkingDirectory=/home/{{ greenplum_admin_user }}
+EnvironmentFile=/home/{{ greenplum_admin_user }}/env_systemmd
+ExecStart={{ installed_dir.files[0].path }}/bin/gpstart -a
+ExecStop={{ installed_dir.files[0].path }}/bin/gpstop -a
+StandardOutput=null
+StandardError=null
+User={{ greenplum_admin_user }}
+Group={{ greenplum_admin_user }}
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+# END ANSIBLE MANAGED BLOCK
+
+

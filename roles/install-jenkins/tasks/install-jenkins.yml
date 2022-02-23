@@ -1,0 +1,45 @@
+---
+
+- name: install key
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+    state: present
+  become: true
+
+- name: install repo
+  apt_repository:
+    repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+  become: true
+
+- name: install jenkins
+  ansible.builtin.apt:
+    name: jenkins
+    update_cache: true
+  become: true
+
+- name: start jenkins
+  systemd:
+    name: jenkins
+    state: started
+    enabled: true
+  become: true
+
+- name: wait start jenkins
+  wait_for:
+    timeout: 20
+
+- name: check site
+  uri:
+    url: "http://{{ ansible_host }}:8080/login?from=%2F"
+
+- name: read remoute file
+  command: "cat /var/lib/jenkins/secrets/initialAdminPassword"
+  become: true
+  register: passwordjenkins
+  changed_when: false
+
+- name: cat file
+  debug:
+    msg: "Visit site http://{{ ansible_host }}:8080 and push whis token {{ passwordjenkins.stdout }}"
+
+...

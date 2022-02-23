@@ -1,0 +1,15 @@
+- name: default pkg
+  apt:
+    pkg:
+      - gpg
+      - curl
+      - aptitude
+      - sudo
+      - apt-transport-https
+      - htop
+      - atop
+      - software-properties-common
+      - python3-pip
+      - postgresql-client
+    update_cache: true
+  become: true

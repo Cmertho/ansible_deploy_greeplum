@@ -1,0 +1,17 @@
+---
+# tasks file for install-db-nginx
+- name: install pre pkg
+  import_tasks: apt.yml
+  when: ansible_os_family == 'Debian'
+  tags:
+    - install_db
+
+- name: install db
+  import_tasks: install-greenplum.yml
+  when: ansible_os_family == 'Debian'
+  tags:
+    - install_db
+
+- name: install nginx
+  import_tasks: install-nginx.yml
+  when: ansible_os_family == 'Debian'

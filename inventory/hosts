@@ -1,0 +1,2 @@
+jenkins ansible_host= ansible_user=
+db ansible_host= ansible_user=

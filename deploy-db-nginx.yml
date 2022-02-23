@@ -1,0 +1,4 @@
+- hosts: db
+  roles:
+    - install-db-nginx
+  

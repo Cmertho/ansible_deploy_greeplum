@@ -1,0 +1,114 @@
+---
+
+- name: Allow 'sudo' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+  become: true
+
+- name: create user
+  user:
+    name: "{{ greenplum_admin_user }}"
+    password: "{{ greenplum_admin_password | password_hash('sha512', 'DvkPtCtNH+UdbePZfm9muQ9pU') }}"
+    shell: "/bin/bash"
+    generate_ssh_key: true
+    groups:
+      - sudo
+  register: create_user
+  become: true
+
+- name: change install directory ownership
+  file:
+    path: '{{ item.path }}'
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
+    recurse: true
+  become: true
+  with_items: "{{ installed_dir.files }}"
+
+- name: create dir base
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
+  loop:
+    - "/home/{{ greenplum_admin_user }}/primary"
+    - "/home/{{ greenplum_admin_user }}/master"
+  become: true
+
+- name: copy file pginit
+  template:
+    src: gpinitsystem_singlenode.j2
+    dest: /home/{{ greenplum_admin_user }}/gpinitsystem_singlenode
+    mode: 0755
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
+  become: true
+
+- name: copy file hostlist
+  template:
+    src: hostlist_singlenode.j2
+    dest: /home/{{ greenplum_admin_user }}/hostlist_singlenode
+    mode: 0755
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
+  become: true
+
+- name: replace logind
+  lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: '^#RemoveIPC=yes'
+    line: 'RemoveIPC=no'
+    backup: true
+  become: true
+
+- name: restart logind
+  systemd:
+    name: systemd-logind
+    state: restarted
+  become: true
+
+
+- name: replace sshd
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication no'
+    line: 'PasswordAuthentication yes'
+    backup: true
+  become: true
+
+- name: replace sshd
+  lineinfile:
+    path: /etc/ssh/ssh_config
+    regexp: '^#   StrictHostKeyChecking ask'
+    line: 'StrictHostKeyChecking no'
+  become: true
+
+- name: restart sshd
+  systemd:
+    name: sshd
+    state: restarted
+  become: true
+
+- name: copy file .bashrc
+  template:
+    src: .bashrc.j2
+    dest: /home/{{ greenplum_admin_user }}/.bashrc
+    owner: "{{ greenplum_admin_user }}"
+    group: "{{ greenplum_admin_user }}"
+    mode: 0644
+  become: true
+
+- name: Set authorized key taken from file
+  authorized_key:
+    user: "{{ item.user }}"
+    state: present
+    key: "{{ item.key }}"
+  loop:
+    - {user: "{{ greenplum_admin_user }}", key: "{{ create_user.ssh_public_key }}"}
+  become: true
