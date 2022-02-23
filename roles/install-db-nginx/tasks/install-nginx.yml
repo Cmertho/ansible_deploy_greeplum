@@ -78,3 +78,8 @@
     msg: "{{ content_nginx }}"
   tags:
     - test_install_nginx
+
+- name: wait check site
+  wait_for: 60
+  tags:
+    - test_install_nginx
